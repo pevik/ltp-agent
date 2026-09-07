@@ -3,9 +3,10 @@
 # AGENTS.md
 
 Guidance for AI coding agents working on this repository (`ltp-agent`).
-This project hosts skills, rules, and tooling used by AI agents to review,
-analyze, and convert [Linux Test Project](https://github.com/linux-test-project/ltp)
-tests. It does NOT contain LTP tests itself.
+This project hosts skills, rules, and tooling used by AI agents to design,
+review, analyze, and convert
+[Linux Test Project](https://github.com/linux-test-project/ltp) tests.
+It does NOT contain LTP tests itself.
 
 ## Repository Layout
 
@@ -13,7 +14,8 @@ tests. It does NOT contain LTP tests itself.
   `opencode.sh`, `gemini.sh`, `copilot.sh`), invoked by `setup.sh`. Agent-
   specific assets live in subdirectories, e.g. `agents/opencode/agent/*.md`
   holds the opencode multi-agent conversion pipeline definitions.
-- `skills/` — skill bundles (`ltp-review`, `ltp-analyze`, `ltp-convert`).
+- `skills/` - skill bundles (`ltp`, `ltp-review`, `ltp-analyze`,
+  `ltp-teach`, `ltp-convert`).
   Each skill has a `SKILL.md` and supporting prompt or template files.
 - `rules/` — rule files loaded on demand by skills. One topic per file.
 - `tools/` — helper scripts (`scan-old-api.py`, `ltp-build.sh`,
@@ -24,15 +26,17 @@ tests. It does NOT contain LTP tests itself.
 ## Scope Rules
 
 - This repo configures agents; it does NOT modify the LTP source tree.
-- When a task says "review/analyze/convert a test", the target file lives
+- When a task says "design/review/analyze/convert a test", the target file lives
   in a separate LTP checkout, not in this repo.
 - Skills MUST stay agent-agnostic. Do NOT hardcode paths or behaviors that
   only work for one agent (Claude, pi, opencode, gemini, copilot).
 
 ## Editing Rules
 
-- Every new file MUST start with an `SPDX-License-Identifier: GPL-2.0-or-later`
-  comment in the syntax appropriate for the file type.
+- Except for skill files and shell scripts, every new file MUST start with an
+  `SPDX-License-Identifier: GPL-2.0-or-later` comment in the file type's syntax.
+- Skill files MUST put YAML frontmatter first and the SPDX comment
+  immediately after it.
 - Markdown lines MUST stay under 100 characters. Wrap longer lines.
 - Shell scripts MUST start with `#!/bin/sh` or `#!/bin/bash` and the SPDX tag
   on the second line.
@@ -63,8 +67,8 @@ Skills MUST:
 
 - Declare the rule files they load.
 - Be read-only unless their purpose is to modify files (e.g. `ltp-convert`).
-- Write outputs to predictable paths at the LTP tree root (e.g.
-  `review-inline.txt`).
+- Write persisted outputs to predictable paths at the LTP tree root (e.g.
+  `review-inline.txt`). Read-only skills can return reports in the conversation.
 
 ## Tooling
 

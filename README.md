@@ -2,7 +2,7 @@
 
 # LTP Agent
 
-AI agent configuration for reviewing, converting, and testing
+AI agent configuration for test design, reviewing, converting, and testing
 [Linux Test Project](https://github.com/linux-test-project/ltp) patches.
 
 Supported AI coding agents:
@@ -42,8 +42,9 @@ The `ltp` skill is an automatic entry point. When you work inside an LTP
 tree, it loads on its own and makes the agent aware that LTP-specific rules
 apply to every code change, review, analysis, and commit message. It routes
 the agent to the relevant rule files under `rules/` and to the specialized
-skills (`ltp-review`, `ltp-analyze`, `ltp-convert`). You do not invoke it
-directly; it activates whenever the working directory looks like an LTP tree.
+skills (`ltp-review`, `ltp-analyze`, `ltp-teach`, `ltp-convert`). You do not
+invoke it directly; it activates whenever the working directory looks like
+an LTP tree.
 
 ## Usage
 
@@ -71,6 +72,38 @@ and coverage):
 The skill works on any LTP test (old API, new API, or shell). It produces a
 report covering test intent, value, robustness, coverage gaps, API/style
 compliance, and prioritized recommendations. No files are modified.
+
+### Designing Tests for a Coding Model
+
+Select a strong model in your client. From the LTP checkout, ask:
+
+```text
+Use ltp-teach to design tests for <feature or regression>.
+```
+
+Clients that expose skills as `/name` can use
+`/ltp-teach <feature or regression>`.
+Pi uses `/skill:ltp-teach <feature or regression>`.
+The skill uses the current checkout and source locations from your session
+instructions. It researches existing coverage and asks questions only when
+missing facts block the design.
+
+The skill returns an implementation brief in the conversation. The brief
+includes source evidence, cases with stable IDs, expected results,
+false-pass risks, file changes, and proposed verification commands. Its
+status is `READY` or `BLOCKED`. The skill does not modify files, implement
+tests, or execute commands that build or run tests.
+
+Give a `READY` brief to the smaller coding model. The brief contains
+instructions to preserve its cases and assertions and report actual
+verification results. Select both models in your client. The skill does
+not switch models or launch agents.
+Use client permissions to enforce read-only access when needed.
+
+For an existing installation, run `./setup.sh <agent>` again from this
+repository. The installer overwrites installed skill copies and, for
+OpenCode, agent definitions.
+Quit and restart OpenCode after installation to load the new skill.
 
 ### Converting Old Tests to New API
 

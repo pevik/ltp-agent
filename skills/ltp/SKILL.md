@@ -2,8 +2,8 @@
 name: ltp
 description: Load anytime the working directory is a Linux Test Project (LTP)
   tree, and always load it when you answer questions or edit code inside an
-  LTP tree. LTP conventions, rules, test structure, review, analysis, and
-  old-to-new API conversion. Read this anytime you operate on LTP code.
+  LTP tree. LTP conventions, rules, test design, structure, review, analysis,
+  and old-to-new API conversion. Read this anytime you operate on LTP code.
 invocation_policy: automatic
 ---
 
@@ -90,6 +90,16 @@ recommendations without modifying files.
 
 Invoke with `/ltp-analyze <file path or test name>`.
 
+### Test Design
+
+When asked to design tests for a feature or regression, use `ltp-teach`.
+It researches requirements and returns an implementation brief for a smaller
+coding model. It does not modify files, implement tests, or execute them.
+Use `ltp-analyze` instead to assess the quality of an existing test.
+
+Invoke with `Use ltp-teach to design tests for <feature or regression>.`
+The current LTP checkout and session-provided source locations are the defaults.
+
 ### Old-to-New API Conversion
 
 When asked to convert an LTP test from the old API (`test.h`) to the new API
@@ -117,4 +127,5 @@ Conversion Plan approval before any file is changed.
 
 - Patch reviews produce `review-inline.txt` at the LTP tree root.
 - Analysis and conversion follow the output rules of their respective skills.
+- Test design returns an implementation brief in the conversation, not a file.
 - Never write ltp-agent outputs into unrelated parts of the LTP source tree.
