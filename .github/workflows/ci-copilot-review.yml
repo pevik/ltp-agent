@@ -36,9 +36,9 @@ jobs:
       - name: Install Copilot CLI
         run: npm install -g @github/copilot
 
-      - name: Install pwclient
+      - name: Install dependencies
         run: |
-          pip install 'pwclient @ git+https://github.com/getpatchwork/pwclient'
+          pip install b4 'pwclient @ git+https://github.com/getpatchwork/pwclient'
 
           cat > ~/.pwclientrc <<EOF
           [options]
@@ -93,9 +93,8 @@ jobs:
           git config user.name "LTP CI"
           git config user.email "ltp-ci@noreply.github.com"
           git checkout -b "review/series-${{ inputs.SERIES_ID }}" master
-          curl -sL "$PATCHWORK_URL/series/${{ inputs.SERIES_ID }}/mbox/" -o /tmp/series.mbox
-          git am /tmp/series.mbox
-          rm -f /tmp/series.mbox
+
+          b4 am -o - "${{ steps.series.outputs.msgid }}" | git am
 
           echo "### Patch Series" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
