@@ -14,6 +14,8 @@ implementation brief. The implementer knows C but needs explicit
 kernel-testing decisions.
 Define what each test must prove and how to observe it. Leave local names and
 straightforward C structure to the implementer.
+Return a compact decision contract, not a research report. State each
+decision once; reference shared requirements rather than repeating them.
 
 ## Invocation and defaults
 
@@ -83,14 +85,24 @@ checkout.
 For each expected result, cite a source path and symbol or section.
 Include line numbers and revisions when available. Explain what each source
 proves.
+Assign short evidence IDs so cases can reuse citations.
 Do not invent errno values, helpers, feature requirements, or source references.
 If evidence conflicts or required evidence is unavailable, mark the issue
-as a blocker.
+as a blocker. Before drafting the full brief, return the conflicting evidence,
+a compact outline of supported cases, and the smallest question needed to
+proceed. Do not choose an expected result merely to match current behavior.
+
+Stop research when required behaviors have sufficient evidence, existing
+coverage is understood, and necessary helpers are verified. Expand research
+only to resolve a concrete uncertainty.
 
 ## 3. Define the intent contract
 
 An intent contract states the behavior that the implementation must preserve.
-Give each required case a stable ID. Specify these items for every case:
+Give each required case a stable ID. Define shared requirements once, then
+state only case-specific differences. Each case inherits every shared
+requirement unless explicitly overridden. Together, the shared contract and
+each case must specify:
 
 - The behavior and the evidence that supports it.
 - The preconditions and how setup establishes them.
@@ -113,20 +125,13 @@ Do not hide kernel bugs through retries, relaxed assertions, or skip conditions.
 If a probabilistic reproducer is necessary, state its limits and bound its
 runtime.
 
-Example of a meaningful case:
+Use this compact case format; expand only where needed to prevent an
+implementation mistake:
 
 ```text
-ID: READ-EOF
-Precondition: A regular file contains known bytes. Its offset is at EOF.
-Operation: read(fd, buf, 1).
-Expected: Return 0. Do not assert errno after success.
-False-pass risk: A zero-length read returns 0 without testing EOF.
-Prevention: Request one byte and establish the offset explicitly.
-Repeatability: Re-establish the offset before each execution.
+ID | Setup and operation | Expected result/effects | False-pass trap | Evidence
+READ-EOF | Seek to EOF; read one byte | Return 0 | Do not request zero bytes | E1
 ```
-
-This example illustrates case design. It does not replace evidence for the
-actual task.
 
 ## 4. Map the contract to LTP
 
@@ -164,30 +169,35 @@ another justified test environment.
 Request affected/fixed-kernel comparison when available. State alternatives and
 limitations when that comparison is unavailable.
 
-Map acceptance checks to case IDs. Include result classification,
-iteration safety, and cleanup. Require actual commands and results from
-the implementer, not claims that unexecuted checks passed.
+The case expectations are the acceptance checks. Add only verification
+requirements not already covered by the contract, such as kernel and ABI
+matrices. Require actual commands and results from the implementer, not
+claims that unexecuted checks passed.
 
 ## 6. Return the brief and stop
 
 Use this structure. Keep it self-contained enough for a fresh
 implementation session.
 Include concrete paths instead of references to earlier conversation messages.
+Do not repeat case expectations in implementation or verification sections.
+Reference rule files rather than reproducing their general guidance.
 
 ```text
 Status: READY | BLOCKED
-Requirement: Target checkout, revisions, interface, and requested behavior.
-Scope and exclusions: Existing coverage and justified additions, if any.
-Evidence: Claims mapped to source paths, symbols or sections, and revisions.
-Case matrix: Stable IDs and the complete intent contract for each case.
-Implementation steps: Dependency order, file changes, APIs, and rule paths.
+Scope: Target checkout/revision, interface, existing coverage, additions,
+  and exclusions.
+Shared contract: Common setup, observations, cleanup, ordering, and skip rules.
+Cases: ID | Setup/operation | Expected result/effects | False-pass trap | Evidence
+Evidence: Source IDs, paths, symbols or sections, and relevant revisions.
+Implementation: Exact files, verified APIs, rule paths, and non-obvious choices.
 Verification: Proposed commands, working directories, prerequisites,
-  and safety limits.
-Acceptance checklist: Checks mapped to case IDs.
+  safety limits, and required environments.
 Unresolved questions: Blocking questions and non-blocking limitations, or none.
 ```
 
-Use `READY` only when no unresolved design question blocks implementation.
+Use `READY` only when implementation requires no unresolved test-design
+decisions. The implementer may choose local C structure, but must not invent
+expected results, synchronization, skip conditions, or test oracles.
 `READY` does not mean the tests passed or execution is authorized.
 If blocked, return supported findings and ask the smallest question that
 permits progress.
